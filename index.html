@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <title>Hanami</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <link rel="stylesheet" href="style.css" />
+  <script type="module" defer src="script.m.js"></script>
+  <script type="module" defer src="elements.m.js"></script>
+  <template for="hanami-hand"> 
+    <div class="cards"></div>
+    <div class="buttons">
+      <ol class="suits">
+        <li class="sunum"><button type="button" name="suits">&#x82B1;</button></li>
+      </ol>
+      <ol class="numbers">
+        <li class="sunum"><button type="button" name="numbers">&#x53F7;</button></li>
+      </ol>
+    </div>
+  </template>
+  <template for="hanami-card"> 
+    <span class="label"></span>
+    <div class="pips"></div>
+    <button type="button" name="discard">&#x6368;</button>
+    <button type="button" name="play">&#x7F6E;</button>
+  </template>
+  <template for="hanami-game">
+    <div class="mat">
+      <div class="discard"></div>
+      <div class="drawpile"></div>
+      <div class="foundation"></div>
+      <div class="time"></div>
+      <div class="food"></div>
+    </div>
+  </template>
+</head>
+<body>
+<header>
+  <h1>Hanami</h1>
+</header>
+<main>
+  <form action="">
+    <button name="host" type="button">Host</button>
+    <button name="join" type="button">Join</button>
+    <button name="connect" type="button">Connect</button>
+    <output placeholder="Give this code to your partner"></output>
+    <button name="copy" type="button">Copy</button>
+    <textarea placeholder="Put your partner's code here"></textarea>
+    <button name="start" type="button">Start Game</button> 
+  </form>
+</main>
+<footer>Made by Benjamin Martin</footer>
+</body>
+</html>

@@ -1,0 +1,248 @@
+
+*{
+    box-sizing:border-box;
+}
+
+html {
+    background:black;
+    color:white;
+    width:100%;
+    height:100%;
+    margin:0;
+    padding:0;
+    --rainbow: linear-gradient(in oklab, hsl(0 100 50), hsl(90 100 47), hsl(180 100 50), hsl(270 100 50), hsl(340 100 50));
+}
+
+h1 {
+    margin:0;
+}
+
+body{
+    width:100%;
+    height:100%;
+    margin:auto;
+    padding:0 42px;
+}
+
+main {
+    background:forestgreen;
+    width:100%;
+    height:90%;
+    margin:auto;
+    padding:5px;
+}
+
+form {
+    background:#112;
+    margin:auto;
+    width:75%;
+    height:75%;
+}
+
+hanami-game+form{
+    display:none;
+}
+
+form textarea {
+    display:block;
+    width:20em;
+    height:10em;
+}
+
+form output {
+    background:#16161D;
+    display:block;
+    width:20em;
+    height:10em;
+    word-wrap: break-word;
+    overflow:auto;
+}
+
+hanami-hand {
+    display:flex;
+    border: 3px solid black;
+    border-radius:5px;
+    margin:7px;
+    padding:10px;
+    width:min-content;
+}
+
+hanami-hand .cards {
+    display:flex;
+}
+
+.current hanami-hand:not(.player) .buttons {
+    display:flex;
+}
+
+hanami-hand .buttons>ol{
+    position:relative;
+}
+
+hanami-hand .buttons>ol>li:not(.sunum) {
+    display:none;
+}
+
+hanami-hand .buttons .suits .radial button{
+    background:var(--suit-color); 
+}
+
+hanami-hand .buttons>ol:focus-within>li.radial {
+    display:block;
+    position:absolute;
+    right:0;
+    top:0;
+    transform: translate(
+        calc(cos( var(--radial-nth) / var(--radial-of) * 44/7) * 2em), 
+        calc(sin( var(--radial-nth) / var(--radial-of) * 44/7) * 2em));
+}
+
+:is(ol.numbers, ol.suits) li::marker {
+    content:none;
+    display:none;
+    font-size:0;
+}
+
+hanami-hand .buttons button {
+    height:2em;
+    width:2em;
+    border-radius:50%;
+    font-weight:bold;
+}
+
+hanami-hand .buttons {
+    display:none;
+    flex-direction:column;
+    justify-content:space-around;
+}
+
+hanami-card {
+    display:block;
+    width:85px;
+    height:110px;
+    background: #050505;
+    border-radius:5px;
+    border: none;
+    writing-mode: vertical-rl;
+    font-size:xx-large;
+    margin:5px;
+    padding:7px;
+    position:relative;
+}
+
+hanami-card>span{
+    color:var(--suit-color);
+}
+
+hanami-card.sake>span{
+    background: var(--suit-color);
+    background-clip: text;
+    color: transparent;
+}
+
+hanami-card button[name=discard]{
+    background:firebrick;
+    position:absolute;
+    top:-.25em;
+    left:1em;
+    color:white;
+}
+
+hanami-card button[name=play]{
+    background:darkblue;
+    position:absolute;
+    top:-.25em;
+    right:1em;
+    color:white;
+}
+
+hanami-card>button {
+    display:none;
+    font-weight:bold;
+}
+
+hanami-card .pips {
+    display:none;
+    position:absolute;
+    bottom:.25em;
+    height:1.75em;
+    width:1.75em;
+    font-size:x-small;
+    font-weight:bold;
+    color:white;
+    text-align:center;
+    border-radius:50%;
+    left:-.25em;
+    background:blue;
+}
+
+hanami-card .pips>span{
+    margin:auto;
+}
+
+hanami-card[data-suit] .pips{
+    display:flex;
+    background:var(--suit-color);
+    color:contrast-color(var(--suit-color));
+}
+
+hanami-card[data-num] .pips{
+    display:flex;
+    
+}
+
+hanami-card.sakura span, [data-sunum="sakura"], [data-suit="sakura"] { 
+    --suit-color:pink; 
+}
+hanami-card.ume    span, [data-sunum="ume"   ], [data-suit="ume"   ] { 
+    --suit-color:purple; 
+}
+hanami-card.momo   span, [data-sunum="momo"  ], [data-suit="momo"  ] { 
+    --suit-color:orange; 
+}
+hanami-card.sumomo span, [data-sunum="sumomo"], [data-suit="sumomo"] { 
+    --suit-color:#e5e5e5; 
+}
+hanami-card.hanabi span, [data-sunum="hanabi"], [data-suit="hanabi"] { 
+    --suit-color:red; 
+}
+hanami-card.sake   span, [data-suit="sake"]    { 
+    --suit-color: var(--rainbow); 
+}
+
+.current hanami-hand.player hanami-card>button {
+    display:inline;
+    height:2em;
+    width:2em;
+    border-radius:50%;
+    border:none;
+}
+
+hanami-hand.player hanami-card>span {
+    display:none;
+}
+
+.mat {
+    display:block;
+    background:darkblue;
+    margin:auto;
+    width:50%;
+    height:40%;
+}
+
+.discard{
+    display:flex;
+    overflow:auto;
+}
+
+.foundation{
+    display:flex;
+}
+
+.foundation>div hanami-card:not(:last-child){
+    display:none;
+}
+
+.mat hanami-card button {
+    display:none;
+}
