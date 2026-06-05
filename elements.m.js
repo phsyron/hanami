@@ -148,7 +148,7 @@ class HanamiHand extends BzCustom {
 
 class HanamiGame extends BzCustomL { 
 
-    constructor(allCards,allHands,youAre){
+    constructor(allCards,allHands,youAre,dango,health){
         super();
         this.player = youAre;
         if(youAre==0){
@@ -156,6 +156,15 @@ class HanamiGame extends BzCustomL {
         }
         this.discardPile = this.querySelector('.discard');
         this.foundation = this.querySelector('.mat>.foundation');
+        this.timeSpan = this.querySelector('.time>span');
+        this.showTime(health);
+        this.food = this.querySelector('.food');
+        this.dango = [];
+        for(let i=0; i<dango; i++){
+            let t = document.createElement('div');
+            t.classList.add('dango');
+            this.dango.push(t);
+        }
         this.cards = allCards;
         for(let id in allCards){
             this.cards[id].domEl = new HanamiCard(this.cards[id]);
@@ -174,9 +183,11 @@ class HanamiGame extends BzCustomL {
                this.draw(card,playerID);
             }
         }
+        this.setDango(dango);
         BB.addEventListener('discard',(e)=>{
                 this.discard(e.detail.id);
                 this.draw(e.detail.newcard,e.detail.player);
+                this.setDango(e.detail.dango);
                 this.nextPlayer(e.detail.newPlayer);
             }, {passive:true,signal:this.abort.signal});
         BB.addEventListener('play',(e)=>{
@@ -187,10 +198,12 @@ class HanamiGame extends BzCustomL {
         BB.addEventListener('failedplay',(e)=>{
                 this.discard(e.detail.id);
                 this.draw(e.detail.newcard,e.detail.player);
+                this.showTime(e.detail.health);
                 this.nextPlayer(e.detail.newPlayer);
             }, {passive:true,signal:this.abort.signal});
         BB.addEventListener('tell',(e)=>{
                 this.tell(e.detail.info);
+                this.setDango(e.detail.dango);
                 this.nextPlayer(e.detail.newPlayer);
             }, {passive:true,signal:this.abort.signal});
     }
@@ -240,6 +253,20 @@ class HanamiGame extends BzCustomL {
         //this.querySelector(`[player="${newPlayer}"]`).classList.add('current');
     }
 
+    setDango(nval){
+        for(let [i,e] of this.dango.entries()){
+            if(i<nval){
+                this.food.appendChild(e);
+            } else {
+                e.remove();
+            }
+        }
+    }
+
+    showTime(newtime){
+        this.timeSpan.innerText = newtime;
+    }
+
 }
 
 customElements.define("hanami-card", HanamiCard);
@@ -253,7 +280,7 @@ BB.addEventListener('init',(dat)=>{
        old.remove(); 
     }
     let det = dat.detail;
-    let game = new HanamiGame(det.cards,det.hands,det.player);
+    let game = new HanamiGame(det.cards,det.hands,det.player,det.dango,det.health);
     board.insertBefore(game,board.querySelector('form'));
 },{passive:true});
 

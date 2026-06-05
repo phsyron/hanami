@@ -103,9 +103,11 @@ class Game {
         }
         let card = hand.splice(i,1);
         this.discardPile.push(card);
+        this.dango += 1;
+        let dango = this.dango;
         let newcard = this.deal(player);
         let newPlayer = this.nextPlayer();
-        this.session.sendAll('discard',{player,id,newcard,newPlayer})
+        this.session.sendAll('discard',{player,id,newcard,newPlayer,dango})
     }
 
     nextPlayer(){
@@ -173,13 +175,19 @@ class Game {
         this.session.player = this.session.channels.length;
         let cards = this.cards;
         let hands = this.hands.map( (h) => h.map( x=>x.id ) );
+        let dango = this.dango;
+        let health = this.health;
         for(let player in hands){
-            this.session.sendTo('init',{hands,cards,player},player);
+            this.session.sendTo('init',{hands,cards,player,dango,health},player);
         };
     }
     
     tell(player,sunum){
-        if( player == this.curPlayer || !this.decrDango() ){
+        if( player == this.curPlayer ){
+            console.log("can't tell",player,sunum,"not your turn");
+            return;
+        }
+        if( !this.decrDango() ){
             console.log("can't tell",player,sunum,this.dango);
             return;
         }
