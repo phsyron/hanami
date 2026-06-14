@@ -39,6 +39,10 @@ form {
     height:75%;
 }
 
+fieldset[disabled] {
+    display:none;
+}
+
 hanami-game+form{
     display:none;
 }
@@ -262,6 +266,11 @@ hanami-hand.player hanami-card>span {
 .food {
     display:flex;
     padding:5px 10px;
+}
+
+.food, .time, .foundation, .discard {
+    border: 1px solid black;
+
 }
 
 .food>div {

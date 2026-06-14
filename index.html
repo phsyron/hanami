@@ -39,14 +39,44 @@
   <h1>Hanami</h1>
 </header>
 <main>
-  <form action="">
-    <button name="host" type="button">Host</button>
-    <button name="join" type="button">Join</button>
-    <button name="connect" type="button">Connect</button>
-    <output placeholder="Give this code to your partner"></output>
-    <button name="copy" type="button">Copy</button>
-    <textarea placeholder="Put your partner's code here"></textarea>
-    <button name="start" type="button">Start Game</button> 
+  <form action="" autocomplete="off">
+    <fieldset>
+      <legend>Select Game Type</legend>
+      <label>
+        <input type="radio" name="gametype" value="hotseat" checked/>
+        Hotseat
+      </label>
+      <label>
+        <input type="radio" name="gametype" value="host"/>
+        Host
+      </label>
+      <label>
+        <input type="radio" name="gametype" value="join"/>
+        Join
+      </label>
+    </fieldset>
+    <fieldset>
+      <label><input type="text" name="username" /> Display Name</label>
+    </fieldset>
+    <fieldset id="hotseat" class="gametypeoptions">
+      <legend>Hotseat</legend>
+    </fieldset>
+    <fieldset id="host" class="gametypeoptions" disabled>
+      <legend>Host</legend>
+      <button name="host" type="button">Host</button>
+      <output></output>
+      <button name="copy" type="button">Copy</button>
+      <textarea placeholder="Put your partner's code here"></textarea>
+      <button name="connect" type="button">Add</button>
+      <button name="start" type="button">Start Game</button> 
+    </fieldset>
+    <fieldset id="join" class="gametypeoptions" disabled>
+      <legend>Join</legend>
+      <textarea placeholder="Put your partner's code here"></textarea>
+      <button name="join" type="button">Join</button>
+      <output></output>
+      <button name="copy" type="button">Copy</button>
+    </fieldset>
   </form>
 </main>
 <footer>Made by Benjamin Martin</footer>
