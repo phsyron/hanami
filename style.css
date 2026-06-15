@@ -11,6 +11,7 @@ html {
     margin:0;
     padding:0;
     --rainbow: linear-gradient(in oklab 210deg, hsl(0 100 50), hsl(90 100 47), hsl(180 100 50), hsl(270 100 50), hsl(340 100 50));
+    --card-height: 110px;
 }
 
 h1 {
@@ -69,6 +70,7 @@ hanami-hand {
     margin:7px;
     padding:10px;
     width:min-content;
+    height:min-content;
 }
 
 hanami-hand .cards {
@@ -122,8 +124,8 @@ hanami-hand .buttons {
 
 hanami-card {
     display:block;
-    width:85px;
-    height:110px;
+    height:var(--card-height);
+    width:calc(var(--card-height) * 85/110);
     background: #050505;
     border-radius:5px;
     border: none;
@@ -240,8 +242,8 @@ hanami-hand.player hanami-card>span {
     display:block;
     background:darkblue;
     margin:auto;
-    width:50%;
-    height:40%;
+    width:100%;
+    height:100%;
 }
 
 .time {
@@ -261,6 +263,7 @@ hanami-hand.player hanami-card>span {
 .discard{
     display:flex;
     overflow:auto;
+    min-height:var(--card-height);
 }
 
 .food {
@@ -287,6 +290,7 @@ hanami-hand.player hanami-card>span {
 
 .foundation{
     display:flex;
+    min-height:var(--card-height);
 }
 
 .foundation>div hanami-card:not(:last-child){
@@ -296,3 +300,34 @@ hanami-hand.player hanami-card>span {
 .mat hanami-card button {
     display:none;
 }
+
+hanami-game {
+    display:grid;
+    grid-template:
+        ".. HN .."
+        "HW MM HE"
+        ".. HS ..";
+    height:100%;
+    width:100%;
+}
+
+hanami-game>.mat {
+    grid-area: MM;
+}
+
+hanami-game>hanami-hand.HS {
+    grid-area: HS;
+}
+
+hanami-game>hanami-hand.HN {
+    grid-area: HN;
+}
+
+hanami-game>hanami-hand.HW {
+    grid-area: HW;
+}
+
+hanami-game>hanami-han.HE {
+    grid-area: HE;
+}
+

@@ -26,6 +26,12 @@ const SHORTS = {
     1: '\u4E00', 2: '\u4E8C', 3: '\u4E09', 4: '\u56DB', 5: '\u4E94'
 }
 
+function MODULO(n,d){
+    /* I get % being wrong b/c backwards compatability, 
+        but how is this not in the Math library?? */
+    return ((n % d) + d) % d;
+}
+
 export class HanamiCard extends BzCustom{ 
 
     suit;
@@ -174,9 +180,16 @@ class HanamiGame extends BzCustomL {
         for (let playerID in allHands){
             let hand = allHands[playerID];
             let newhand = new HanamiHand(playerID);
+            let positions = {
+                2:['HS','HN'],
+                3:['HS','HW','HN'],
+                4:['HS','HW','HN','HE']
+            };
             if(playerID==youAre){
                 newhand.classList.add('player');
             }
+            let pos_i = MODULO( playerID-youAre, allHands.length );
+            newhand.classList.add(positions[2][pos_i]);
             this.hands[playerID] = newhand;
             this.appendChild(newhand);
             for (let card of hand){
@@ -268,6 +281,11 @@ class HanamiGame extends BzCustomL {
     }
 
 }
+
+class HanamiForm extends BzCustom {
+
+}
+
 
 customElements.define("hanami-card", HanamiCard);
 customElements.define("hanami-hand", HanamiHand);
