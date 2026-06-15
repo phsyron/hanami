@@ -10,31 +10,9 @@ worker.onmessage = (msg) => {
     let type = msg.data.type;
     let detail = msg.data.payload;
     console.log(type,detail);
-    if(type=='send'){
-        theRTC.channel.send(JSON.stringify(detail));
-    } else {
-        let e = new CustomEvent(type,{detail});
-        BB.dispatchEvent(e);
-    }
+    let e = new CustomEvent(type,{detail});
+    BB.dispatchEvent(e);
 };
-
-let gtos = document.querySelectorAll('.gametypeoptions');
-let show_gto = (gt) => {
-    console.log(gt);
-    for(let gto of gtos){
-        if(gto.id == gt){
-            gto.removeAttribute('disabled');
-        } else {
-            gto.setAttribute('disabled','');
-        }
-    }
-}
-
-for(let el of document.querySelectorAll('input[name="gametype"]')){
-    el.oninput = (e) => show_gto(e.target.value);
-}
-
-show_gto(document.querySelector('input[name="gametype"][checked]').value);
 
 class myRTC extends RTC{
     
@@ -44,41 +22,88 @@ class myRTC extends RTC{
 
 }
 
-let form = document.querySelector('form');
-let houtput = form.querySelector('fieldset#host output');
-let hta = form.querySelector('fieldset#host textarea');
-let hbutt_copy = form.querySelector('button[name="copy"]');
-hbutt_copy.onclick = () => {
-    navigator.clipboard.write([new ClipboardItem({["text/plain"]:houtput.value})]);
-};
-let hbutt_start = form.querySelector('button[name="start"]');
-hbutt_start.onclick = () => worker.postMessage({type:'newGame',payload:{nPlayers:2}});
-let butt_host = form.querySelector('button[name="host"]');
-butt_host.onclick = (e) => {
-    theRTC.one();
+class GameOptions {
+
+    form;
+    gtos;
+    join_rtc;
+    host_rtc;
+
+    constructor(form){
+        this.form = form;
+        this.gtos = this.form.querySelectorAll('.gametypeoptions');
+        for(let el of this.form.querySelectorAll('input[name="gametype"]')){
+            el.oninput = (e) => this.show_gto(e.target.value);
+        }
+        this.show_gto(this.find('input[name="gametype"][checked]').value);
+        // host
+        this.host_rtc = new myRTC(freeStun,true);
+        this.find('button[name="copy"]').onclick = () => {
+            let val = this.find('fieldset#host output').value;
+            this.copy(val);
+        };
+        this.find('button[name="start"]').onclick = () => {
+            document.worker.postMessage({type:'newGame',payload:{nPlayers:2}});
+        };
+        this.find('button[name="host"]').onclick = (e) => {
+            this.host_rtc.one();
+        };
+        this.host_rtc.addEventListener('icecandidate',(e)=>{
+            console.log(JSON.stringify(e.description));
+            this.find('fieldset#host output').value = this.encode(e.description);
+        });
+        this.find('button[name="connect"]').onclick = (e) =>{
+            let val = this.find('fieldset#host textarea').value;
+            this.host_rtc.three(this.decode(val));
+        };
+        //join
+        this.join_rtc = new myRTC(freeStun,true);
+        this.join_rtc.addEventListener('answercreated',(e)=>{
+            console.log(JSON.stringify(e.description));
+            this.find('fieldset#join output').value = this.encode(e.description);
+        });
+        this.find('fieldset#join button[name="copy"]').onclick = () => {
+            let val = this.find('fieldset#join output').value;
+            this.copy(val);
+        };
+        this.find('button[name="join"]').onclick = (e) => {
+            let val = this.find('fieldset#join textarea').value;
+            this.join_rtc.two(this.decode(val));
+        };
+    }
+
+    encode(dat){
+        return btoa(JSON.stringify(dat));
+    }
+
+    decode(dat){
+        return JSON.parse(atob(dat));
+    }
+
+    find(query){
+        return this.form.querySelector(query);
+    }
+
+    copy(value){
+        navigator.clipboard.write([new ClipboardItem({["text/plain"]:value})]);
+    }
+
+    show_gto(gt) {
+        console.log(gt);
+        for(let gto of this.gtos){
+            if(gto.id == gt){
+                gto.removeAttribute('disabled');
+            } else {
+                gto.setAttribute('disabled','');
+            }
+        }
+    }
+
 }
 
-let theRTC = new myRTC(freeStun,true);
-theRTC.addEventListener('icecandidate',(e)=>{
-    console.log(JSON.stringify(e.description));
-    houtput.value = btoa(JSON.stringify(e.description));
-});
-theRTC.addEventListener('answercreated',(e)=>{
-    console.log(JSON.stringify(e.description));
-    joutput.value = btoa(JSON.stringify(e.description));
-});
-window.theRTC = theRTC;
 
-let joutput = form.querySelector('fieldset#join output');
-let jta = form.querySelector('fieldset#join textarea');
-let jbutt_copy = form.querySelector('fieldset#join button[name="copy"]');
-jbutt_copy.onclick = () => {
-    navigator.clipboard.write([new ClipboardItem({["text/plain"]:joutput.value})]);
-};
+let theGameOpts = new GameOptions(document.querySelector('form'));
+window.theRTC = theGameOpts.join_rtc;
 
-let butt_join = form.querySelector('button[name="join"]');
-butt_join.onclick = (e) => theRTC.two(JSON.parse(atob(jta.value)));
-let butt_connect = form.querySelector('button[name="connect"]');
-butt_connect.onclick = (e) => theRTC.three(JSON.parse(atob(hta.value)));
 
 
