@@ -1,6 +1,7 @@
 "use strict";
 
 import {BB} from "./script.m.js"
+import {RTC, freeStun} from "./rtc.m.js"
 
 class BzCustom extends HTMLElement{
 
@@ -282,14 +283,128 @@ class HanamiGame extends BzCustomL {
 
 }
 
-class HanamiForm extends BzCustom {
+class myRTC extends RTC{
+
+    setChannelCallbacks(e){
+        document.worker.postMessage({type:'channel',payload:this.channel},[this.channel]);
+    }
 
 }
 
+function copy(value){
+    navigator.clipboard.write([new ClipboardItem({["text/plain"]:value})]);
+}
+
+function encode(dat){
+    return btoa(JSON.stringify(dat));
+}
+
+function decode(dat){
+    return JSON.parse(atob(dat));
+}
+
+class HanamiHostedPlayer extends BzCustom {
+
+    rtc;
+
+    constructor(){
+        super();
+        this.rtc = new myRTC(freeStun,true);
+        this.rtc.one();
+        this.copybutton.onclick = () => copy(this.output.value);
+        this.rtc.addEventListener('icecandidate',(e)=>{
+            this.output.value = encode(e.description);
+        });
+        this.connectbutton.onclick = (e) =>{
+            this.rtc.three(decode(this.textarea.value));
+        };
+    }
+
+    get connectbutton() {
+        return this.querySelector('button.connect');
+    }
+
+    get copybutton() {
+        return this.querySelector('button.copy');
+    }
+
+    get textarea() {
+        return this.querySelector('textarea');
+    }
+
+    get output() {
+        return this.querySelector('output');
+    }
+
+}
+
+class GameOptions {
+
+    form;
+    gtos;
+    join_rtc;
+    host_rtc=[];
+
+    constructor(form){
+        this.form = form;
+        this.gtos = this.form.querySelectorAll('.gametypeoptions');
+        for(let el of this.form.querySelectorAll('input[name="gametype"]')){
+            el.oninput = (e) => this.show_gto(e.target.value);
+        }
+        this.show_gto(this.find('input[name="gametype"][checked]').value);
+        // host
+        this.find('button[name="start"]').onclick = () => {
+            document.worker.postMessage({type:'newGame',payload:{nPlayers:2}});
+        };
+        this.find('button[name="add"]').onclick = (e) => {
+            let hp = new HanamiHostedPlayer();
+            this.find('div').appendChild(hp);
+            this.host_rtc.push(hp.rtc);
+        };
+        //join
+        this.join_rtc = new myRTC(freeStun,true);
+        this.join_rtc.addEventListener('answercreated',(e)=>{
+            console.log(JSON.stringify(e.description));
+            this.find('fieldset#join output').value = encode(e.description);
+        });
+        this.find('fieldset#join button[name="copy"]').onclick = () => {
+            let val = this.find('fieldset#join output').value;
+            copy(val);
+        };
+        this.find('button[name="join"]').onclick = (e) => {
+            let val = this.find('fieldset#join textarea').value;
+            this.join_rtc.two(decode(val));
+        };
+        //general
+        this.find('input[name="username"]').oninput = (e) => {
+            let name = e.target.value;
+            document.worker.postMessage({type:'nameChange',payload:name});
+        };
+    }
+
+    find(query){
+        return this.form.querySelector(query);
+    }
+
+    show_gto(gt) {
+        console.log(gt);
+        for(let gto of this.gtos){
+            if(gto.id == gt){
+                gto.removeAttribute('disabled');
+            } else {
+                gto.setAttribute('disabled','');
+            }
+        }
+    }
+
+}
+
+let theGameOpts = new GameOptions(document.querySelector('form'));
 
 customElements.define("hanami-card", HanamiCard);
 customElements.define("hanami-hand", HanamiHand);
 customElements.define("hanami-game", HanamiGame);
+customElements.define("hanami-hosted-player", HanamiHostedPlayer);
 
 BB.addEventListener('init',(dat)=>{
     let board = document.querySelector('main');

@@ -33,6 +33,12 @@
       <div class="food"></div>
     </div>
   </template>
+  <template for="hanami-hosted-player">
+    <output></output>
+    <button class="copy" type="button">Copy</button>
+    <textarea placeholder="Put your partner's code here"></textarea>
+    <button class="connect" type="button">Connect</button>
+  </template>
 </head>
 <body>
 <header>
@@ -63,11 +69,8 @@
     </fieldset>
     <fieldset id="host" class="gametypeoptions" disabled>
       <legend>Host</legend>
-      <button name="host" type="button">Host</button>
-      <output></output>
-      <button name="copy" type="button">Copy</button>
-      <textarea placeholder="Put your partner's code here"></textarea>
-      <button name="connect" type="button">Add</button>
+      <div id="hostedplayers"></div>
+      <button name="add" type="button">Add</button>
       <button name="start" type="button">Start Game</button> 
     </fieldset>
     <fieldset id="join" class="gametypeoptions" disabled>
