@@ -514,7 +514,7 @@ class GameOptions {
 
     get hostedplayers() { return /**@type {HTMLDivElement}*/ (this.form.querySelector('div#hostedplayers')); }
 
-    get joinbutton() { return /**@type {HTMLButtonElement}*/ (this.form.querySelector('fieldset#join output')); }
+    get joinbutton() { return /**@type {HTMLButtonElement}*/ (this.form.querySelector('button[name="join"]')); }
 
     get joincopybutton() { return /**@type {HTMLButtonElement}*/ (this.form.querySelector('fieldset#join button[name="copy"]')); }
 
