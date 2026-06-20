@@ -1,163 +1,141 @@
 
-export var freeStun = {iceServers: [{urls: 'stun:stun1.l.google.com:19302'}]};
+export var freeStun = { iceServers: [{ urls: 'stun:stun1.l.google.com:19302' }] };
 
-export class RTC extends EventTarget{
+/**
+ * Helper wrapper class around RTCPeerConnection and RTCDataChannel
+ */
+export class RTC extends EventTarget {
 
-    channel;
-    configuration;
-    logging;
+    /**@type {RTCDataChannel?}*/ channel = null;
+    /**@type {RTCConfiguration}*/ configuration = {};
+    /**@type {boolean}*/ logging;
+    /**@type {RTCPeerConnection}*/ connection;
 
-    constructor(configuration,logging=true){
+    /**
+     * @param {RTCConfiguration} configuration 
+     * @param {boolean} logging 
+     */
+    constructor(configuration, logging = true) {
         super();
-        if(configuration) {
+        if (configuration) {
             this.configuration = configuration;
-        } else{
-          this.configuration = {};
         }
         this.logging = logging;
         this.connection = new RTCPeerConnection(this.configuration);
-        this.connection.onicecandidate = (x)=>{this.onIceCandidate(x)};
-        this.connection.ondatachannel = (x)=>{this.onDataChannel(x)};
+        this.connection.onicecandidate = (x) => { this.onIceCandidate(x) };
+        this.connection.ondatachannel = (x) => { this.onDataChannel(x) };
     }
 
-    setChannelCallbacks(){
-        this.channel.onmessage = (x) => this.onMessage(x);
-        this.channel.onopen = (x) => this.onOpen(x);
-        this.channel.onclose = (x) => this.channelClose(x);
-    }
-
-    onIceCandidate(e){
-        let d = this.connection.localDescription;
-        if(this.logging){
-            console.log('new ICE candidate',JSON.stringify(d));
+    /**
+     * Called whenever a channel is opened
+     */
+    setChannelCallbacks() {
+        if (this.channel) {
+            this.channel.onmessage = (x) => this.onMessage(x);
+            this.channel.onopen = (x) => this.onOpen(x);
+            this.channel.onclose = (x) => this.onClose(x);
         }
-        this.dispatchEvent(new IceCandidateEvent(d));
     }
 
-    onMessage(e){
-        if(this.logging){
+    /**
+     * Called when theres a new Ice candidate. 
+     * @param {RTCPeerConnectionIceEvent} e 
+     */
+    onIceCandidate(e) {
+        let d = this.connection.localDescription;
+        if (this.logging) {
+            console.log('new ICE candidate', JSON.stringify(d));
+        }
+        this.dispatchEvent(new CustomEvent('icecandidate', { detail: d }));
+    }
+
+    /**
+     * Called whenever `channel` receives a message
+     * @param {MessageEvent} e 
+     */
+    onMessage(e) {
+        if (this.logging) {
             console.log('new message:', e.data);
         }
-        this.dispatchEvent(new MessageEvent(e.data));
+        this.dispatchEvent(new CustomEvent('message', { detail: e.data }));
     }
 
-    onOpen(e){
-        if(this.logging){
+    /**
+     * Called when `this.channel` opens
+     * @param {Event} e 
+     */
+    onOpen(e) {
+        if (this.logging) {
             console.log('channel open');
         }
-        this.dispatchEvent(new OpenEvent());
+        this.dispatchEvent(new CustomEvent('open'));
     }
 
-    onClose(e){
-        if(this.logging){
+    /**
+     * Called when `this.channel` closes
+     * @param {Event} e 
+     */
+    onClose(e) {
+        if (this.logging) {
             console.log('channel closed');
         }
-        this.dispatchEvent(new CloseEvent());
+        this.dispatchEvent(new CustomEvent('close'));
     }
 
-    onDataChannel(e){
-        if(this.logging){
-            console.log('new data channel',e);
+    /**
+     * Called when `this.channel` is created
+     * @param {RTCDataChannelEvent} e 
+     */
+    onDataChannel(e) {
+        if (this.logging) {
+            console.log('new data channel', e);
         }
-        this.dispatchEvent(new DataChannelEvent());
+        this.dispatchEvent(new CustomEvent('datachannel'));
         this.channel = e.channel;
         this.setChannelCallbacks();
     }
 
-    onAnswerCreated(answer){
-        let d = this.connection.localDescription;
-        if(this.logging){
-            console.log('answer created:',JSON.stringify(d));
+    /**
+     * Called when an answer is created.
+     * @param {RTCSessionDescriptionInit} answer 
+     */
+    onAnswerCreated(answer) {
+        if (this.logging) {
+            console.log('answer created:', JSON.stringify(answer));
         }
-        this.dispatchEvent(new AnswerCreatedEvent(d));
+        this.dispatchEvent(new CustomEvent('answercreated', { detail: answer }));
     }
 
-    one(){
+    /**
+     * The host calls this first to initialize the connection.
+     */
+    one() {
         this.channel = this.connection.createDataChannel('data');
         this.setChannelCallbacks();
-        this.connection.createOffer().then( (o) => this.connection.setLocalDescription(o))
+        this.connection.createOffer().then((o) => this.connection.setLocalDescription(o))
     }
 
-    two(offer){
+    /**
+     * The guest calls this with the offer given by the host.
+     * It's better to override `onAnswerCreated()` than this.
+     * @param {RTCSessionDescriptionInit} offer 
+     */
+    two(offer) {
         this.connection.setRemoteDescription(offer)
-            .then(()=>{if(this.logging){console.log('done')}});
+            .then(() => { if (this.logging) { console.log('done') } });
         this.connection.createAnswer()
-            .then(a=>this.connection.setLocalDescription(a))
-            .then(a=>this.onAnswerCreated(a));
+            .then(a => {
+                this.connection.setLocalDescription(a);
+                this.onAnswerCreated(a)
+            });
     }
 
-    three(answer){
+    /**
+     * The Host calls this with the answer given by the guest
+     * @param {RTCSessionDescriptionInit} answer 
+     */
+    three(answer) {
         this.connection.setRemoteDescription(answer)
-            .then(()=>{if(this.logging){console.log('done')}});
+            .then(() => { if (this.logging) { console.log('done') } });
     }
 }
-
-class IceCandidateEvent extends Event {
-
-    #description;
-
-    constructor(description){
-        super('icecandidate');
-        this.#description = description;
-    }
-
-    get description(){
-        return this.#description;
-    }
-
-}
-
-class MessageEvent extends Event {
-
-    #message;
-
-    constructor(message){
-        super('message');
-        this.#message = message;
-    }
-
-    get message(){
-        return this.#message;
-    }
-
-}
-
-class OpenEvent extends Event {
-
-    constructor(){
-        super('open');
-    }
-
-}
-
-class CloseEvent extends Event {
-
-    constructor(){
-        super('close');
-    }
-
-}
-
-class DataChannelEvent extends Event {
-
-    constructor(){
-        super('datachannel');
-    }
-
-}
-
-class AnswerCreatedEvent extends Event {
-
-    #description;
-
-    constructor(description){
-        super('answercreated');
-        this.#description = description;
-    }
-
-    get description(){
-        return this.#description;
-    }
-
-}
-
