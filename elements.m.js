@@ -398,6 +398,7 @@ class HanamiGame extends BzCustomL {
 
 class myRTC extends RTC {
 
+    /** @override */
     setChannelCallbacks() {
         // @ts-ignore RTCDataChannel is now transferrable as of 2026 //TODO remove ts-ignore when linters catch up
         worker.postMessage({ type: 'channel', payload: this.channel }, [this.channel]);
@@ -437,7 +438,7 @@ class HanamiHostedPlayer extends BzCustom {
 
     constructor() {
         super();
-        this.rtc = new myRTC(freeStun, true);
+        this.rtc = new myRTC(freeStun, false);
         this.rtc.one();
         this.copybutton.onclick = () => copy(this.output.value);
         addCustomListener(this.rtc, 'icecandidate', (e) => {
@@ -465,7 +466,6 @@ class GameOptions {
     /**@type {myRTC[]}*/ host_rtc = [];
 
     /**
-     * 
      * @param {HTMLFormElement} form 
      */
     constructor(form) {
@@ -484,9 +484,8 @@ class GameOptions {
             this.host_rtc.push(hp.rtc);
         };
         //join
-        this.join_rtc = new myRTC(freeStun, true);
+        this.join_rtc = new myRTC(freeStun, false);
         addCustomListener(this.join_rtc, 'answercreated', (e) => {
-            console.log(JSON.stringify(e.detail));
             this.joinoutput.value = encode(e.detail);
         });
         this.joincopybutton.onclick = () => {
@@ -528,13 +527,13 @@ class GameOptions {
 
     /**
      * Show the given gametype option fieldset
-     * @param {string} gt 
+     * @param {string} gameType 
      */
-    show_gto(gt) {
-        console.log(gt);
+    show_gto(gameType) {
         for (let gto of this.gtos) {
-            if (gto.id == gt) {
+            if (gto.id == gameType) {
                 gto.removeAttribute('disabled');
+                worker.postMessage({ type: 'gameTypeChange', payload: gameType });
             } else {
                 gto.setAttribute('disabled', '');
             }
