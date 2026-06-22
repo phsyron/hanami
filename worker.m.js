@@ -56,10 +56,9 @@ class Game {
     /**@type {{[key:string]:number}}*/ foundation;
     /**@type {Card[]}*/ discardPile;
     /**@type {number}*/ health;
-    /**@type {RTCDataChannel[]}*/ channels = [];
 
     /**
-     * @param {Session} session the session controlling the game
+     * @param {HostSession} session the session controlling the game
      */
     constructor(session) {
         this.session = session;
@@ -256,31 +255,76 @@ class Game {
 
 class Session {
 
-    /**@type {Game?}*/ game = null;
-    /**@type {string}*/ role = 'client';
-    /**@type {RTCDataChannel[]}*/ channels = [];
-    /**@type {number}*/ player = Math.random();
-
     constructor() {
-        self.onmessage = (msg) => this.localMessage(msg);
+        if (new.target === Session) {
+            throw new TypeError("Abstract classes are not constructable");
+        }
     }
 
     /**
-     * Receive and process a message. 
+     * Receive a new channel from UI
+     * @param {RTCDataChannel} channel 
+     */
+    addChannel(channel) { }
+
+    /**
+     * Take appropriate Game action on message from other player 
+     * @param {string} type 
+     * @param {any} payload 
+     * @param {number} player the player that initiated the event
+     * @returns 
+     */
+    gameMessage(type, payload, player) { }
+
+    /**
+     * Receive and process a message from the local UI
+     * @param {MessageEvent<{type:string,payload:any}>} msg 
+     */
+    localMessage(msg) { }
+
+    /**
+     * Receive a message from another player
+     * @param {MessageEvent<string>} message a JSON object like {type,payload}
+     * @param {number} player the player that sent the message
+     * @returns 
+     */
+    remoteMessage(message, player) { }
+
+    /**
+     * Broadcast a message to all players (including self)
+     * @param {string} type 
+     * @param {any} payload 
+     */
+    sendAll(type, payload) { }
+
+    /**
+     * Send a message to a sepecific player
+     * @param {string} type 
+     * @param {any} payload 
+     * @param {number} player who to send to  
+     */
+    sendTo(type, payload, player) { }
+
+}
+
+class HostSession extends Session {
+
+    /**@type {Game?}*/ game = null;
+    /**@type {RTCDataChannel[]}*/ channels = [];
+    /**@type {number}*/ player = Math.random();
+
+    /**
+     * @inheritdoc
      * @param {MessageEvent<{type:string,payload:any}>} msg 
      */
     localMessage(msg) {
         let { type, payload } = msg.data;
+        console.log('local', type, payload);
         switch (type) {
             case 'channel':
-                let n = this.channels.length;
-                payload.onmessage = (/**@type {MessageEvent}*/e) => this.remoteMessage(e, n);
-                payload.onclose = (/**@type {Event}*/e) => console.log('channel closed', e);
-                this.channels.push(payload);
-                console.log(this.channels.length)
+                this.addChannel(payload);
                 break;
             case 'newGame':
-                this.role = 'host';
                 this.game = new Game(this);
                 this.game.run();
                 break;
@@ -290,10 +334,22 @@ class Session {
     }
 
     /**
-     * Send a message to a sepecific player
+     * @inheritdoc
+     * @param {RTCDataChannel} channel 
+     */
+    addChannel(channel) {
+        let n = this.channels.length;
+        channel.onmessage = (/**@type {MessageEvent}*/e) => this.remoteMessage(e, n);
+        channel.onclose = (/**@type {Event}*/e) => console.log('channel closed', e);
+        this.channels.push(channel);
+        console.log(this.channels.length)
+    }
+
+    /**
+     * @inheritdoc
      * @param {string} type 
      * @param {any} payload 
-     * @param {number} player 
+     * @param {number} player who to send to  
      */
     sendTo(type, payload, player) {
         if (player == this.player) {
@@ -304,7 +360,7 @@ class Session {
     }
 
     /**
-     * Broadcast a message to all players (including self)
+     * @inheritdoc
      * @param {string} type 
      * @param {any} payload 
      */
@@ -316,7 +372,7 @@ class Session {
     }
 
     /**
-     * Receive a message from another player
+     * @inheritdoc
      * @param {MessageEvent<string>} message a JSON object like {type,payload}
      * @param {number} player the player that sent the message
      * @returns 
@@ -324,29 +380,26 @@ class Session {
     remoteMessage(message, player) {
         console.log('remote', player, message.data);
         let msg = JSON.parse(message.data);
-        if (this.role == 'client') {
-            self.postMessage(msg);
-            return;
-        } else {
-            let { type, payload } = msg;
-            this.gameMessage(type, payload, player);
+        let { type, payload } = msg;
+        switch (type) {
+            case 'nameChange':
+                console.log('should do something with this name huh', payload);
+                break;
+            default:
+                this.gameMessage(type, payload, player);
         }
     }
 
     /**
-     * Take appropriate Game action on message from other player 
+     * @inheritdoc
      * @param {string} type 
      * @param {any} payload 
      * @param {number} player the player that initiated the event
      * @returns 
      */
     gameMessage(type, payload, player) {
-        if (this.role == 'client') {
-            this.sendTo(type, payload, 0);
-            return;
-        }
         if (this.game == null) {
-            console.log('received play on unstarted game', type, payload, player);
+            console.log('received game action on unstarted game', type, payload, player);
             return;
         }
         switch (type) {
@@ -366,7 +419,113 @@ class Session {
 
 }
 
+class ClientSession extends Session {
 
-var session = new Session();
+    /**@type {RTCDataChannel?}*/ #hostchannel = null;
+    /**@type {number}*/ #HOST = 2;
+    /**@type {number}*/ #SELF = Math.random();
+
+    /**
+     * @inheritdoc
+     * @param {MessageEvent<{type:string,payload:any}>} msg 
+     */
+    localMessage(msg) {
+        let { type, payload } = msg.data;
+        switch (type) {
+            case 'channel':
+                this.addChannel(payload);
+                break;
+            default:
+                this.sendTo(type, payload, this.#HOST);
+        }
+    }
+
+    /**
+     * @inheritdoc
+     * @param {RTCDataChannel} channel 
+     */
+    addChannel(channel) {
+        if (this.#hostchannel != null) {
+            console.log("joined second channel, overriding original");
+        }
+        channel.onmessage = (/**@type {MessageEvent}*/e) => this.remoteMessage(e, this.#HOST);
+        channel.onclose = (/**@type {Event}*/e) => console.log('channel closed', e);
+        this.#hostchannel = channel;
+        console.log('channel added')
+    }
+
+    /**
+     * @inheritdoc
+     * @param {string} type 
+     * @param {any} payload 
+     * @param {number} player who to send to  
+     */
+    sendTo(type, payload, player) {
+        if (player != this.#HOST) {
+            self.postMessage({ type, payload });
+            return;
+        }
+        if (this.#hostchannel == null) {
+            console.log("tried to send message before receiving channel", type, payload);
+            return;
+        }
+        this.#hostchannel.send(JSON.stringify({ type, payload }));
+    }
+
+    /**
+     * @inheritdoc
+     * @param {string} type 
+     * @param {any} payload 
+     */
+    sendAll(type, payload) {
+        this.sendTo(type, payload, this.#SELF);
+        this.sendTo(type, payload, this.#HOST);
+    }
+
+    /**
+     * @inheritdoc
+     * @param {MessageEvent<string>} message a JSON object like {type,payload}
+     * @param {number} player the player that sent the message
+     * @returns 
+     */
+    remoteMessage(message, player) {
+        console.log('remote', player, message.data);
+        let msg = JSON.parse(message.data);
+        self.postMessage(msg);
+    }
+
+    /**
+     * @inheritdoc
+     * @param {string} type 
+     * @param {any} payload 
+     * @param {number} player the player that initiated the event
+     * @returns 
+     */
+    gameMessage(type, payload, player) {
+        console.log("ClientSession has no game, can't process game message")
+    }
+
+}
 
 
+/**@type {Session}*/ var session = new ClientSession();
+
+
+self.onmessage = (msg) => {
+    let { type, payload } = msg.data;
+    if (type == 'gameTypeChange') {
+        switch (payload) {
+            case 'host':
+                console.log('hosting')
+                self.session = new HostSession();
+                break;
+            case 'join':
+                self.session = new ClientSession();
+                break;
+            default:
+                self.session = new ClientSession();
+        }
+        return;
+    }
+    self.session.localMessage(msg);
+}
