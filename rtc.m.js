@@ -110,7 +110,7 @@ export class RTC extends EventTarget {
      * The host calls this first to initialize the connection.
      */
     one() {
-        this.channel = this.connection.createDataChannel('data');
+        this.channel = this.connection.createDataChannel(uuid_64());
         this.setChannelCallbacks();
         this.connection.createOffer().then((o) => this.connection.setLocalDescription(o))
     }
@@ -138,4 +138,8 @@ export class RTC extends EventTarget {
         this.connection.setRemoteDescription(answer)
             .then(() => { if (this.logging) { console.log('done') } });
     }
+}
+
+function uuid_64(){
+    return btoa(String.fromCharCode(...Array.from(crypto.getRandomValues(new Uint8Array(16)))));
 }
