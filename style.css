@@ -50,15 +50,15 @@ hanami-game+form{
 
 form textarea {
     display:block;
-    width:20em;
-    height:10em;
+    width:15em;
+    height:5em;
 }
 
 form output {
     background:#16161D;
     display:block;
-    width:20em;
-    height:10em;
+    width:15em;
+    height:5em;
     word-wrap: break-word;
     overflow:auto;
 }
@@ -329,5 +329,29 @@ hanami-game>hanami-hand.HW {
 
 hanami-game>hanami-han.HE {
     grid-area: HE;
+}
+
+hanami-hosted-player {
+
+    display:flex;
+    height:5em;
+    max-width:100%;
+    flex-direction:row;
+    align-items: center;
+    justify-content: space-between;
+
+    &>output.code, &>textarea {
+        height:90%;
+        flex-basis:10em;
+        flex-grow:1;
+    }
+
+    &>output.username {
+        height:min-content;
+        width:min-content;
+        min-height: 1em;
+        min-width: 3em;
+    }
+
 }
 

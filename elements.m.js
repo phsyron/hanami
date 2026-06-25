@@ -434,7 +434,8 @@ function decode(dat) {
 
 class HanamiHostedPlayer extends BzCustom {
 
-    rtc;
+    /**@type {myRTC}*/ rtc;
+    /**@type {string?}*/ peerID = null;
 
     constructor() {
         super();
@@ -447,6 +448,18 @@ class HanamiHostedPlayer extends BzCustom {
         this.connectbutton.onclick = (e) => {
             this.rtc.three(decode(this.textarea.value));
         };
+        addCustomListener(BB, 'nameChange', (e) => {
+            console.log(e, e.detail)
+            if (this.peerID && this.peerID in e.detail) {
+                this.username.innerText = e.detail[this.peerID];
+            }
+        });
+        addCustomListener(BB, 'TODO', (e) => {
+            console.log(e, e.detail)
+            if (e.detail.channel == this.rtc.channel?.label) {
+                this.peerID = e.detail.peer;
+            }
+        });
     }
 
     get connectbutton() { return /**@type {HTMLButtonElement}*/ (this.querySelector('button.connect')); }
@@ -455,7 +468,9 @@ class HanamiHostedPlayer extends BzCustom {
 
     get textarea() { return /**@type {HTMLTextAreaElement}*/ (this.querySelector('textarea')); }
 
-    get output() { return /**@type {HTMLOutputElement}*/ (this.querySelector('output')); }
+    get output() { return /**@type {HTMLOutputElement}*/ (this.querySelector('output.code')); }
+
+    get username() { return /**@type {HTMLOutputElement}*/ (this.querySelector('output.username')); }
 
 }
 

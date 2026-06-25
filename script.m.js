@@ -1,7 +1,7 @@
 "use strict";
 
-export const worker = new Worker("worker.m.js", { type: 'module' });
-export const BB = document;
+/**@type {Worker}*/ export const worker = new Worker("worker.m.js", { type: 'module' });
+/**@type {EventTarget}*/ export const BB = document;
 
 /**
  * 
