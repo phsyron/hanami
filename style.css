@@ -1,358 +1,390 @@
-
-*{
-    box-sizing:border-box;
+* {
+    box-sizing: border-box;
 }
 
 html {
-    background:black;
-    color:white;
-    width:100%;
-    height:100%;
-    margin:0;
-    padding:0;
+    background: black;
+    color: white;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
     --rainbow: linear-gradient(in oklab 210deg, hsl(0 100 50), hsl(90 100 47), hsl(180 100 50), hsl(270 100 50), hsl(340 100 50));
     --card-height: 110px;
 }
 
 h1 {
-    margin:0;
+    margin: 0;
 }
 
-body{
-    width:100%;
-    height:100%;
-    margin:auto;
-    padding:0 42px;
+body {
+    width: 100%;
+    height: 100%;
+    margin: auto;
+    padding: 0 42px;
 }
 
 main {
-    background:forestgreen;
-    width:100%;
-    height:90%;
-    margin:auto;
-    padding:5px;
+    background: forestgreen;
+    width: 100%;
+    height: 90%;
+    margin: auto;
+    padding: 5px;
 }
 
 form {
-    background:#112;
-    margin:auto;
-    width:75%;
-    height:75%;
+    background: #112;
+    margin: auto;
+    width: 75%;
+    height: 75%;
+
+    hanami-game+& {
+        display: none;
+    }
+
+    & textarea {
+        display: block;
+        width: 15em;
+        height: 5em;
+    }
+
+    & output {
+        background: #16161D;
+        display: block;
+        width: 15em;
+        height: 5em;
+        word-wrap: break-word;
+        overflow: auto;
+    }
+
 }
 
 fieldset[disabled] {
-    display:none;
-}
-
-hanami-game+form{
-    display:none;
-}
-
-form textarea {
-    display:block;
-    width:15em;
-    height:5em;
-}
-
-form output {
-    background:#16161D;
-    display:block;
-    width:15em;
-    height:5em;
-    word-wrap: break-word;
-    overflow:auto;
+    display: none;
 }
 
 hanami-hand {
-    display:flex;
+    display: flex;
     border: 3px solid black;
-    border-radius:5px;
-    margin:7px;
-    padding:10px;
-    width:min-content;
-    height:min-content;
-}
+    border-radius: 5px;
+    margin: 7px;
+    padding: 10px;
+    width: min-content;
+    height: min-content;
 
-hanami-hand .cards {
-    display:flex;
-}
+    & .cards {
+        display: flex;
+    }
 
-.current hanami-hand:not(.player) .buttons {
-    display:flex;
-}
+    & .buttons {
+        display: none;
+        flex-direction: column;
+        justify-content: space-around;
 
-hanami-hand .buttons>ol{
-    position:relative;
-}
+        & button {
+            height: 2em;
+            width: 2em;
+            border-radius: 50%;
+            font-weight: bold;
+        }
 
-hanami-hand .buttons>ol>li:not(.sunum) {
-    display:none;
-}
+    }
 
-hanami-hand .buttons .suits .radial button{
-    background:var(--suit-color); 
-}
+    .current &:not(.player) .buttons {
+        display: flex;
+    }
 
-hanami-hand .buttons>ol:focus-within>li.radial {
-    display:block;
-    position:absolute;
-    right:0;
-    top:0;
-    transform: translate(
-        calc(cos( var(--radial-nth) / var(--radial-of) * 44/7) * 2em), 
-        calc(sin( var(--radial-nth) / var(--radial-of) * 44/7) * 2em));
+    & .buttons > ol {
+        position: relative;
+    }
+
+    & .buttons > ol > li:not(.sunum) {
+        display: none;
+    }
+
+    & .buttons .suits .radial button {
+        background: var(--suit-color);
+    }
+
+    & .buttons > ol:focus-within > li.radial {
+        display: block;
+        position: absolute;
+        right: 0;
+        top: 0;
+        transform: translate(calc(cos(var(--radial-nth) / var(--radial-of) * 44/7) * 2em),
+                calc(sin(var(--radial-nth) / var(--radial-of) * 44/7) * 2em));
+    }
+
 }
 
 :is(ol.numbers, ol.suits) li::marker {
-    content:none;
-    display:none;
-    font-size:0;
-}
-
-hanami-hand .buttons button {
-    height:2em;
-    width:2em;
-    border-radius:50%;
-    font-weight:bold;
-}
-
-hanami-hand .buttons {
-    display:none;
-    flex-direction:column;
-    justify-content:space-around;
+    content: none;
+    display: none;
+    font-size: 0;
 }
 
 hanami-card {
-    display:block;
-    height:var(--card-height);
-    width:calc(var(--card-height) * 85/110);
+    display: block;
+    height: var(--card-height);
+    width: calc(var(--card-height) * 85/110);
     background: #050505;
-    border-radius:5px;
+    border-radius: 5px;
     border: none;
     writing-mode: vertical-rl;
-    font-size:xx-large;
-    margin:5px;
-    padding:7px;
-    position:relative;
+    font-size: xx-large;
+    margin: 5px;
+    padding: 7px;
+    position: relative;
+
+    & > span {
+        color: var(--suit-color);
+        position: absolute;
+    }
+
+    &.sake > span {
+        background: var(--suit-color);
+        background-clip: text;
+        color: transparent;
+    }
+
+    & > button {
+        display: none;
+        font-weight: bold;
+
+        &[name=discard] {
+            background: firebrick;
+            position: absolute;
+            top: -.25em;
+            left: 1em;
+            color: white;
+        }
+
+        &[name=play] {
+            background: darkblue;
+            position: absolute;
+            top: -.25em;
+            right: 1em;
+            color: white;
+        }
+    }
+
+    & > .pips {
+        display: none;
+        position: absolute;
+        bottom: .25em;
+        height: 1.75em;
+        width: 1.75em;
+        font-size: x-small;
+        font-weight: bold;
+        color: white;
+        text-align: center;
+        border-radius: 50%;
+        left: -.25em;
+        background: blue;
+
+        & > span {
+            margin: auto;
+        }
+
+        .mat & {
+            display: none;
+        }
+
+        [data-suit] > & {
+            display: flex;
+            background: var(--suit-color);
+            color: var(--contrast-color);
+        }
+
+        [data-num] > & {
+            display: flex;
+        }
+    }
+
 }
 
-hanami-card>span{
-    color:var(--suit-color);
-    position:absolute;
+hanami-card.sakura span,
+[data-sunum="sakura"],
+[data-suit="sakura"] {
+    --suit-color: pink;
+    --contrast-color: black;
 }
 
-hanami-card.sake>span{
-    background: var(--suit-color);
-    background-clip: text;
-    color: transparent;
+hanami-card.ume span,
+[data-sunum="ume"],
+[data-suit="ume"] {
+    --suit-color: purple;
+    --contrast-color: white;
 }
 
-hanami-card button[name=discard]{
-    background:firebrick;
-    position:absolute;
-    top:-.25em;
-    left:1em;
-    color:white;
+hanami-card.momo span,
+[data-sunum="momo"],
+[data-suit="momo"] {
+    --suit-color: orange;
+    --contrast-color: black;
 }
 
-hanami-card button[name=play]{
-    background:darkblue;
-    position:absolute;
-    top:-.25em;
-    right:1em;
-    color:white;
+hanami-card.sumomo span,
+[data-sunum="sumomo"],
+[data-suit="sumomo"] {
+    --suit-color: #e5e5e5;
+    --contrast-color: black;
 }
 
-hanami-card>button {
-    display:none;
-    font-weight:bold;
+hanami-card.hanabi span,
+[data-sunum="hanabi"],
+[data-suit="hanabi"] {
+    --suit-color: red;
+    --contrast-color: black;
 }
 
-hanami-card .pips {
-    display:none;
-    position:absolute;
-    bottom:.25em;
-    height:1.75em;
-    width:1.75em;
-    font-size:x-small;
-    font-weight:bold;
-    color:white;
-    text-align:center;
-    border-radius:50%;
-    left:-.25em;
-    background:blue;
+hanami-card.sake span,
+[data-suit="sake"] {
+    --suit-color: var(--rainbow);
+    --contrast-color: black;
 }
 
-hanami-card .pips>span{
-    margin:auto;
+.current hanami-hand.player hanami-card > button {
+    display: inline;
+    height: 2em;
+    width: 2em;
+    border-radius: 50%;
+    border: none;
 }
 
-hanami-card[data-suit] .pips{
-    display:flex;
-    background:var(--suit-color);
-    color:var(--contrast-color);
-}
-
-hanami-card[data-num] .pips{
-    display:flex;
-    
-}
-
-.mat hanami-card .pips {
-    display:none;
-}
-
-hanami-card.sakura span, [data-sunum="sakura"], [data-suit="sakura"] { 
-    --suit-color:pink; 
-    --contrast-color:black;
-}
-hanami-card.ume    span, [data-sunum="ume"   ], [data-suit="ume"   ] { 
-    --suit-color:purple; 
-    --contrast-color:white;
-}
-hanami-card.momo   span, [data-sunum="momo"  ], [data-suit="momo"  ] { 
-    --suit-color:orange; 
-    --contrast-color:black;
-}
-hanami-card.sumomo span, [data-sunum="sumomo"], [data-suit="sumomo"] { 
-    --suit-color:#e5e5e5; 
-    --contrast-color:black;
-}
-hanami-card.hanabi span, [data-sunum="hanabi"], [data-suit="hanabi"] { 
-    --suit-color:red; 
-    --contrast-color:black;
-}
-hanami-card.sake   span, [data-suit="sake"]    { 
-    --suit-color: var(--rainbow); 
-    --contrast-color:black;
-}
-
-.current hanami-hand.player hanami-card>button {
-    display:inline;
-    height:2em;
-    width:2em;
-    border-radius:50%;
-    border:none;
-}
-
-hanami-hand.player hanami-card>span {
-    display:none;
+hanami-hand.player hanami-card > span {
+    display: none;
 }
 
 .mat {
-    display:block;
-    background:darkblue;
-    margin:auto;
-    width:100%;
-    height:100%;
+    display: block;
+    background: darkblue;
+    margin: auto;
+    width: 100%;
+    height: 100%;
+    
+    .food,
+    .time,
+    .foundation,
+    .discard {
+        border: 1px solid black;
+    }
+
+    .time {
+        height: 40px;
+        width: 40px;
+        background-color: goldenrod;
+        color: black;
+        border-radius: 50%;
+        display: flex;
+        font-size: large;
+
+        & > span {
+            margin: auto;
+        }
+    }
+
+    .discard {
+        display: flex;
+        overflow: auto;
+        min-height: var(--card-height);
+    }
+
+    & hanami-card button {
+        display: none;
+    }
+
+    .food {
+        display: flex;
+        padding: 5px 10px;
+
+        & > div {
+            height: 40px;
+            width: 40px;
+            margin: 0px 5px;
+            border-radius: 50%;
+            background: var(--dango);
+            
+            &:nth-child(3n+0) {
+                --dango: pink;
+            }
+
+            &:nth-child(3n+1) {
+                --dango: #eee;
+            }
+
+            &:nth-child(3n+2) {
+                --dango: darkgreen;
+            }
+        }
+    }
+
+    .foundation {
+        display: flex;
+        min-height: var(--card-height);
+        
+        & hanami-card:not(:last-child) {
+            display: none;
+        }
+    }
+
 }
 
-.time {
-    height: 40px;
-    width: 40px;
-    background-color: goldenrod;
-    color: black;
-    border-radius: 50%;
-    display: flex;
-    font-size:large;
-}
-
-.time>span {
-    margin:auto;
-}
-
-.discard{
-    display:flex;
-    overflow:auto;
-    min-height:var(--card-height);
-}
-
-.food {
-    display:flex;
-    padding:5px 10px;
-}
-
-.food, .time, .foundation, .discard {
-    border: 1px solid black;
-
-}
-
-.food>div {
-    height:40px;
-    width:40px;
-    margin:0px 5px;
-    border-radius:50%;
-    background: var(--dango);
-}
-
-.food>:nth-child(3n+0) { --dango:pink; }
-.food>:nth-child(3n+1) { --dango:#eee; }
-.food>:nth-child(3n+2) { --dango:darkgreen; }
-
-.foundation{
-    display:flex;
-    min-height:var(--card-height);
-}
-
-.foundation>div hanami-card:not(:last-child){
-    display:none;
-}
-
-.mat hanami-card button {
-    display:none;
-}
 
 hanami-game {
-    display:grid;
+    display: grid;
     grid-template:
         ".. HN .."
         "HW MM HE"
         ".. HS ..";
-    height:100%;
-    width:100%;
+    height: 100%;
+    width: 100%;
+
+    & > .mat {
+        grid-area: MM;
+    }
+
+    & > hanami-hand {
+        &.HS {
+            grid-area: HS;
+        }
+
+        &.HN {
+            grid-area: HN;
+        }
+
+        &.HW {
+            grid-area: HW;
+        }
+
+        &.HE {
+            grid-area: HE;
+        }
+    }
 }
 
-hanami-game>.mat {
-    grid-area: MM;
-}
-
-hanami-game>hanami-hand.HS {
-    grid-area: HS;
-}
-
-hanami-game>hanami-hand.HN {
-    grid-area: HN;
-}
-
-hanami-game>hanami-hand.HW {
-    grid-area: HW;
-}
-
-hanami-game>hanami-han.HE {
-    grid-area: HE;
-}
 
 hanami-hosted-player {
 
-    display:flex;
-    height:5em;
-    max-width:100%;
-    flex-direction:row;
+    display: flex;
+    height: 5em;
+    max-width: 100%;
+    flex-direction: row;
     align-items: center;
     justify-content: space-between;
 
-    &>output.code, &>textarea {
-        height:90%;
-        flex-basis:10em;
-        flex-grow:1;
+    & > output.code,
+    & > textarea {
+        height: 90%;
+        flex-basis: 10em;
+        flex-grow: 1;
     }
 
-    &>output.username {
-        height:min-content;
-        width:min-content;
+    & > output.username {
+        height: min-content;
+        width: min-content;
         min-height: 1em;
         min-width: 3em;
     }
 
 }
-
