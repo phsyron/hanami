@@ -140,6 +140,33 @@ export class RTC extends EventTarget {
     }
 }
 
-function uuid_64(){
+function uuid_64() {
     return btoa(String.fromCharCode(...Array.from(crypto.getRandomValues(new Uint8Array(16)))));
+}
+
+/**
+ * A class describing an encoding/decoding scheme for arbitrary objects,
+ * intended to make communicating RTCSessionDescription
+ * and RTCSessionDescriptionInit objects easier
+ */
+export class Codec {
+
+    /**
+     * Encode an object into a base64 string
+     * @param {any} dat
+     * @returns {string}
+     */
+    encode(dat) {
+        return btoa(JSON.stringify(dat));
+    }
+
+    /**
+     * Decode a base64 string into an object
+     * @param {string} dat
+     * @returns {any}
+     */
+    decode(dat) {
+        return JSON.parse(atob(dat));
+    }
+
 }

@@ -1,7 +1,9 @@
 "use strict";
 
 import { BB, worker } from "./script.m.js"
-import { RTC, freeStun } from "./rtc.m.js"
+import { RTC, freeStun, Codec } from "./rtc.m.js"
+
+/**@type {Codec}*/ var rtc_codec = new Codec();
 
 /**
  * Custom element helper class. Automatically finds and uses a labeled template tag.
@@ -414,23 +416,6 @@ function copy(value) {
     navigator.clipboard.write([new ClipboardItem({ ["text/plain"]: value })]);
 }
 
-/**
- * Encode an object into a base64 string
- * @param {any} dat 
- * @returns 
- */
-function encode(dat) {
-    return btoa(JSON.stringify(dat));
-}
-
-/**
- * Decode a base64 string into an object
- * @param {string} dat 
- * @returns 
- */
-function decode(dat) {
-    return JSON.parse(atob(dat));
-}
 
 class HanamiHostedPlayer extends BzCustom {
 
@@ -443,10 +428,10 @@ class HanamiHostedPlayer extends BzCustom {
         this.rtc.one();
         this.copybutton.onclick = () => copy(this.output.value);
         addCustomListener(this.rtc, 'icecandidate', (e) => {
-            this.output.value = encode(e.detail);
+            this.output.value = rtc_codec.encode(e.detail);
         });
         this.connectbutton.onclick = (e) => {
-            this.rtc.three(decode(this.textarea.value));
+            this.rtc.three(rtc_codec.decode(this.textarea.value));
         };
         addCustomListener(BB, 'nameChange', (e) => {
             console.log(e, e.detail)
@@ -501,7 +486,7 @@ class GameOptions {
         //join
         this.join_rtc = new myRTC(freeStun, false);
         addCustomListener(this.join_rtc, 'answercreated', (e) => {
-            this.joinoutput.value = encode(e.detail);
+            this.joinoutput.value = rtc_codec.encode(e.detail);
         });
         this.joincopybutton.onclick = () => {
             let val = this.joinoutput.value;
@@ -509,7 +494,7 @@ class GameOptions {
         };
         this.joinbutton.onclick = () => {
             let val = this.jointextarea.value;
-            this.join_rtc.two(decode(val));
+            this.join_rtc.two(rtc_codec.decode(val));
         };
         //general
         this.usernameinput.oninput = () => {
