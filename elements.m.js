@@ -256,7 +256,7 @@ class HanamiGame extends BzCustomL {
         this.hands = {};
         for (let [playerID, hand] of allHands.entries()) {
             let newhand = new HanamiHand(playerID);
-            let positions = {
+            let /**@type {{[key:number]:string[]}}*/ positions = {
                 2: ['HS', 'HN'],
                 3: ['HS', 'HW', 'HN'],
                 4: ['HS', 'HW', 'HN', 'HE']
@@ -265,7 +265,7 @@ class HanamiGame extends BzCustomL {
                 newhand.classList.add('player');
             }
             let pos_i = MODULO(playerID - youAre, allHands.length);
-            newhand.classList.add(positions[2][pos_i]);
+            newhand.classList.add(positions[allHands.length][pos_i]);
             this.hands[playerID] = newhand;
             this.appendChild(newhand);
             for (let card of hand) {

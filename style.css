@@ -138,6 +138,7 @@ hanami-card {
 
 hanami-card>span{
     color:var(--suit-color);
+    position:absolute;
 }
 
 hanami-card.sake>span{
