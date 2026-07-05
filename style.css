@@ -96,6 +96,7 @@ hanami-hand {
 
     & .buttons > ol {
         position: relative;
+        padding: 0;
     }
 
     & .buttons > ol > li:not(.sunum) {
@@ -180,7 +181,7 @@ hanami-card {
         text-align: center;
         border-radius: 50%;
         left: -.25em;
-        background: blue;
+        background: #222;
 
         & > span {
             margin: auto;
@@ -257,11 +258,15 @@ hanami-hand.player hanami-card > span {
 }
 
 .mat {
-    display: block;
-    background: darkblue;
+    display: grid;
+    background: #0d2f95;
     margin: auto;
     width: 100%;
     height: 100%;
+    grid-template: 
+        "disco cards"
+        "found found"
+        "dango timer";
     
     .food,
     .time,
@@ -278,6 +283,7 @@ hanami-hand.player hanami-card > span {
         border-radius: 50%;
         display: flex;
         font-size: large;
+        grid-area: timer;
 
         & > span {
             margin: auto;
@@ -288,6 +294,7 @@ hanami-hand.player hanami-card > span {
         display: flex;
         overflow: auto;
         min-height: var(--card-height);
+        grid-area: disco;
     }
 
     & hanami-card button {
@@ -297,6 +304,7 @@ hanami-hand.player hanami-card > span {
     .food {
         display: flex;
         padding: 5px 10px;
+        grid-area: dango;
 
         & > div {
             height: 40px;
@@ -322,6 +330,7 @@ hanami-hand.player hanami-card > span {
     .foundation {
         display: flex;
         min-height: var(--card-height);
+        grid-area: found;
         
         & hanami-card:not(:last-child) {
             display: none;
@@ -333,33 +342,47 @@ hanami-hand.player hanami-card > span {
 
 hanami-game {
     display: grid;
-    grid-template:
-        ".. HN .."
-        "HW MM HE"
-        ".. HS ..";
+    grid-template-columns: [west-start] 1fr [west-end]  1fr [mid] 1fr [east-start] 1fr [east-end];
+    grid-template-rows: [north-start] 1fr [north-end] min-content [south-start] 1fr [south-end];
     height: 100%;
     width: 100%;
 
     & > .mat {
-        grid-area: MM;
+        grid-column: west-end / east-start;
+        grid-row: north-end / south-start;
     }
 
     & > hanami-hand {
         &.HS {
-            grid-area: HS;
+            grid-column: west-end / east-start;
+            grid-row: south-start / south-end;
         }
 
         &.HN {
-            grid-area: HN;
+            grid-column: west-end / east-start;
+            grid-row: north-start / north-end;
         }
 
         &.HW {
-            grid-area: HW;
+            grid-column: west-start / west-end;
+            grid-row: north-end / south-start;
         }
 
         &.HE {
-            grid-area: HE;
+            grid-column: south-start / east-end;
+            grid-row: north-end / south-start;
         }
+
+        &.NW {
+            grid-column: west-start / mid;
+            grid-row: north-start / north-end;
+        }
+
+        &.NE {
+            grid-column: mid / east-end;
+            grid-row: north-start / north-end;
+        }
+
     }
 }
 

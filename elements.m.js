@@ -260,7 +260,7 @@ class HanamiGame extends BzCustomL {
             let newhand = new HanamiHand(playerID);
             let /**@type {{[key:number]:string[]}}*/ positions = {
                 2: ['HS', 'HN'],
-                3: ['HS', 'HW', 'HN'],
+                3: ['HS', 'NW', 'NE'],
                 4: ['HS', 'HW', 'HN', 'HE']
             };
             if (playerID == youAre) {
