@@ -2,8 +2,9 @@
 
 import { BB, worker } from "./script.m.js"
 import { RTC, freeStun, Codec } from "./rtc.m.js"
+import { Compressor, Corpus} from "./compressor.m.js";
 
-/**@type {Codec}*/ var rtc_codec = new Codec();
+/**@type {Codec}*/ var rtc_codec = new Compressor(await Corpus.fromURL('./example_rtc.txt'));
 
 /**
  * Custom element helper class. Automatically finds and uses a labeled template tag.
